@@ -1,0 +1,104 @@
+<%- include('./layouts/header') %>
+
+<div id="app" class="flex justify-center md:items-center min-h-screen bg-gray-200" dir="rtl">
+
+
+    <div class="w-full bg-white rounded-lg md:p-10 md:m-10">
+        <div class="mx-2">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                  الطلبات الجاهزة
+                </label>
+                <input v-model="data.input" @keyup.enter="addReadyRequest()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="readyRequest" type="number" placeholder="طلبات جاهزة">
+              </div>
+              <div class="mx-2">
+                <button @click="addReadyRequest()"
+                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-center flex justify-center w-full" type="button">
+                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="style=linear">
+                        <g id="add-box">
+                        <path id="vector" d="M2 8C2 4.68629 4.68629 2 8 2H16C19.3137 2 22 4.68629 22 8V16C22 19.3137 19.3137 22 16 22H8C4.68629 22 2 19.3137 2 16V8Z" stroke="#000000" stroke-width="1.5"/>
+                        <path id="vector_2" d="M12 7.75732L12 16.2426" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+                        <path id="vector_3" d="M16.25 12L7.76476 12" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+                        </g>
+                        </g>
+                        </svg>
+                  </button>
+              </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-6 md:gap-5 p-2 md:p-10 md:m-10 items-center">
+            <div v-for="(item,index) in data.list" :key="index"
+             class="w-[150px] h-[150px] border-2 border-blue-400 rounded flex justify-center items-center relative">
+                <div class="absolute -top-5 -left-5">
+                    <button @click="removeRequest(index)"
+                    class="rounded-full bg-blue-500 hover:bg-red-200">
+                        <svg width="48px" height="48px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9.16998 14.83L14.83 9.17004" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14.83 14.83L9.16998 9.17004" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                    </button>
+                </div>
+                <p class="font-extrabold text-3xl drop-shadow ">{{ item }}</p>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script>
+  const { createApp, ref ,onMounted,reactive} = Vue
+  
+  createApp({
+      setup() {
+      const socket = io();
+      const data =  reactive({
+        list : [],
+        input: '',
+      })
+      onMounted(() => {
+
+        socket.on('send all list',(socket)=>{
+            console.log('send all list',socket);
+            addAllRequest()
+        })
+
+        socket.on('add ready request' , (socket)=>{
+            data.list = socket;
+        })
+      })
+
+      function addReadyRequest(){
+        if(data.input != ''){
+            socket.emit('send ready request',[...data.list , data.input])
+            data.input = '';
+        }
+      }
+
+      function addAllRequest(){
+            socket.emit('send ready request',[...data.list])
+      }
+
+
+      function  removeRequest(i) { 
+
+        data.list.splice(i,1);
+
+        console.log(data.list);
+        socket.emit('send ready request',[...data.list])
+
+       }
+
+      return {
+        data,
+        addReadyRequest,
+        addAllRequest,
+        removeRequest
+      }
+    }
+  }).mount('#app')
+</script>
+
+<%- include('./layouts/footer') %>

@@ -1,0 +1,50 @@
+<%- include('./layouts/header') %>
+
+
+
+    <div id="app" class="bg-gray-200  min-h-screen" dir="rtl">
+
+        
+        <div class="text-center pt-10">
+            <h1 class="font-bold text-2xl">مطعم وكافيتريا العائلات</h1>
+        </div>
+        <div class="flex justify-center items-center ">
+            <div class="w-full bg-white rounded-lg p-2 m-2 md:p-10 md:m-10 text-center">
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-1 md:gap-5 md:p-10 md:m-10 items-center">
+                    <div v-for="(item,index) in data.list" :key="index"
+                        class="w-[150px] h-[150px] border-2 border-blue-400 rounded flex justify-center items-center relative">
+                        <p class="font-extrabold text-3xl drop-shadow ">{{ item }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <script>
+        const { createApp, ref, onMounted, reactive } = Vue
+
+        createApp({
+            setup() {
+                const socket = io();
+                const data = reactive({
+                    list: [],
+                    input: '',
+                })
+                onMounted(() => {
+                    socket.on('add ready request', (socket) => {
+                        data.list = socket;
+                    })
+                    socket.emit('get all list')
+                })
+
+                return {
+                    data,
+                }
+            }
+        }).mount('#app')
+    </script>
+
+    <%- include('./layouts/footer') %>
