@@ -7,6 +7,7 @@ const app = express();
 
 app.use(cors());
 app.set("view engine", "ejs");
+app.use(express.static('public'))
 
 const server = new Server(app);
 
@@ -33,6 +34,11 @@ app.get("/", function (req, res) {
 app.get("/admin", function (req, res) {
   res.render("admin");
 });
+
+app.get("/request", function (req, res) {
+  res.render("request");
+});
+
 
 app.get("/**", function (req, res) {
   res.send("page not found");
